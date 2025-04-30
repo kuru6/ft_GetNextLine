@@ -11,9 +11,9 @@
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-#include <fcntl.h>   /* open   */
-#include <stdio.h>   /* printf */
-#include <stdlib.h>  /* free   */
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 int	main(int argc, char **argv)
 {

@@ -3,38 +3,81 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kurumi <kurumi@student.42.fr>              +#+  +:+       +#+        */
+/*   By: kuyamagi < kuyamagi@student.42tokyo.jp>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/18 17:02:05 by kuyamagi          #+#    #+#             */
-/*   Updated: 2025/04/25 12:53:20 by kurumi           ###   ########.fr       */
+/*   Updated: 2025/04/30 14:25:28 by kuyamagi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+#include <unistd.h>
+#include <stdlib.h>
+#include <stddef.h>
+
+static char	*stash_loop(int fd, char *buf, char *stash, size_t *len);
 
 static char	*read_and_stash(int fd, char *stash)
 {
 	char	*buf;
-	ssize_t	bytes_read;
+	size_t	len;
 
-	buf = malloc(BUFFER_SIZE + 1);
+	buf = malloc((size_t)BUFFER_SIZE + 1);
 	if (!buf)
-		return (NULL);
-	bytes_read = 1;
-	while (!ft_strchr_gnl(stash, '\n') && bytes_read > 0)
-	{
-		bytes_read = read(fd, buf, BUFFER_SIZE);
-		if (bytes_read == -1)
-		{
-			free(buf);
-			free(stash);
-			return (NULL);
-		}
-		buf[bytes_read] = '\0';
-		stash = ft_strjoin_gnl(stash, buf);
-	}
+		return (free(stash), NULL);
+	len = ft_strlen_gnl(stash);
+	stash = stash_loop(fd, buf, stash, &len);
 	free(buf);
+	if (!stash)
+		return (NULL);
 	return (stash);
+}
+
+static char	*stash_loop(int fd, char *buf, char *stash, size_t *len)
+{
+	ssize_t	r;
+
+	r = read(fd, buf, BUFFER_SIZE);
+	while (r > 0)
+	{
+		buf[r] = '\0';
+		stash = gnl_append(stash, buf, *len);
+		if (!stash)
+			return (NULL);
+		*len += (size_t)r;
+		if (ft_strchr_gnl(buf, '\n'))
+			break ;
+		r = read(fd, buf, BUFFER_SIZE);
+	}
+	if (r < 0)
+	{
+		free (stash);
+		return (NULL);
+	}
+	return (stash);
+}
+
+static char	*extract_line(char **stash)
+{
+	size_t	i;
+	char	*line;
+	char	*next;
+
+	if (!*stash || **stash == '\0')
+		return (NULL);
+	i = 0;
+	while ((*stash)[i] && (*stash)[i] != '\n')
+		i++;
+	if ((*stash)[i] == '\n')
+		i++;
+	line = ft_strdup_gnl(*stash);
+	if (!line)
+		return (free(*stash), *stash = NULL, NULL);
+	line[i] = '\0';
+	next = ft_strdup_gnl(*stash + i);
+	free(*stash);
+	*stash = next;
+	return (line);
 }
 
 char	*get_next_line(int fd)
@@ -49,4 +92,23 @@ char	*get_next_line(int fd)
 		return (NULL);
 	line = extract_line(&stash);
 	return (line);
+}
+
+void	*ft_memcpy(void *dst, const void *src, size_t n)
+{
+	size_t				i;
+	unsigned char		*d;
+	const unsigned char	*s;
+
+	if (!dst && !src)
+		return (NULL);
+	d = (unsigned char *)dst;
+	s = (const unsigned char *)src;
+	i = 0;
+	while (i < n)
+	{
+		d[i] = s[i];
+		i++;
+	}
+	return (dst);
 }
