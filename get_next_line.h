@@ -25,6 +25,6 @@ char	*ft_strchr_gnl(const char *s, int c);
 char	*ft_strdup_gnl(const char *s1);
 char	*ft_strjoin_gnl(char *s1, char *s2);
 char	*gnl_append(char *stash, const char *buf, size_t rsize);
-void	*ft_memcpy(void *dst, const void *src, size_t n);
+void	*ft_memcpy_gnl(void *dst, const void *src, size_t n);
 
 #endif

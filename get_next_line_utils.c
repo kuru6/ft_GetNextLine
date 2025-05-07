@@ -84,20 +84,21 @@ char	*ft_strjoin_gnl(char *s1, char *s2)
 	return (dst);
 }
 
-char	*gnl_append(char *stash, const char *buf, size_t cur_len)
+void	*ft_memcpy_gnl(void *dst, const void *src, size_t n)
 {
-	char	*tmp;
+	size_t				i;
+	unsigned char		*d;
+	const unsigned char	*s;
 
-	if (stash)
-		tmp = realloc(stash, cur_len + ft_strlen_gnl(buf) + 1);
-	else
-		tmp = malloc(ft_strlen_gnl(buf) + 1);
-	if (!tmp)
-	{
-		free(stash);
+	if (!dst && !src)
 		return (NULL);
+	d = (unsigned char *)dst;
+	s = (const unsigned char *)src;
+	i = 0;
+	while (i < n)
+	{
+		d[i] = s[i];
+		i++;
 	}
-	ft_memcpy(tmp + cur_len, buf, ft_strlen_gnl(buf));
-	tmp[cur_len + ft_strlen_gnl(buf)] = '\0';
-	return (tmp);
+	return (dst);
 }

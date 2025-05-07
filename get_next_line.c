@@ -16,6 +16,23 @@
 #include <stddef.h>
 
 static char	*stash_loop(int fd, char *buf, char *stash, size_t *len);
+static char	*read_and_stash(int fd, char *stash);
+static char	*extract_line(char **stash);
+char		*gnl_append(char *stash, const char *buf, size_t cur_len);
+
+char	*get_next_line(int fd)
+{
+	static char	*stash;
+	char		*line;
+
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+	stash = read_and_stash(fd, stash);
+	if (!stash)
+		return (NULL);
+	line = extract_line(&stash);
+	return (line);
+}
 
 static char	*read_and_stash(int fd, char *stash)
 {
@@ -57,6 +74,26 @@ static char	*stash_loop(int fd, char *buf, char *stash, size_t *len)
 	return (stash);
 }
 
+char	*gnl_append(char *stash, const char *buf, size_t cur_len)
+{
+	char	*tmp;
+	size_t	buf_len;
+
+	buf_len = ft_strlen_gnl(buf);
+	tmp = malloc(cur_len + buf_len + 1);
+	if (!tmp)
+	{
+		free(stash);
+		return (NULL);
+	}
+	if (stash)
+		ft_memcpy_gnl(tmp, stash, cur_len);
+	ft_memcpy_gnl(tmp + cur_len, buf, buf_len);
+	tmp[cur_len + buf_len] = '\0';
+	free(stash);
+	return (tmp);
+}
+
 static char	*extract_line(char **stash)
 {
 	size_t	i;
@@ -70,45 +107,17 @@ static char	*extract_line(char **stash)
 		i++;
 	if ((*stash)[i] == '\n')
 		i++;
-	line = ft_strdup_gnl(*stash);
+	line = malloc(i + 1);
 	if (!line)
-		return (free(*stash), *stash = NULL, NULL);
+	{
+		free(*stash);
+		*stash = NULL;
+		return (NULL);
+	}
+	ft_memcpy_gnl(line, *stash, i);
 	line[i] = '\0';
 	next = ft_strdup_gnl(*stash + i);
 	free(*stash);
 	*stash = next;
 	return (line);
-}
-
-char	*get_next_line(int fd)
-{
-	static char	*stash;
-	char		*line;
-
-	if (fd < 0 || BUFFER_SIZE <= 0)
-		return (NULL);
-	stash = read_and_stash(fd, stash);
-	if (!stash)
-		return (NULL);
-	line = extract_line(&stash);
-	return (line);
-}
-
-void	*ft_memcpy(void *dst, const void *src, size_t n)
-{
-	size_t				i;
-	unsigned char		*d;
-	const unsigned char	*s;
-
-	if (!dst && !src)
-		return (NULL);
-	d = (unsigned char *)dst;
-	s = (const unsigned char *)src;
-	i = 0;
-	while (i < n)
-	{
-		d[i] = s[i];
-		i++;
-	}
-	return (dst);
 }

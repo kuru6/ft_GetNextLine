@@ -26,6 +26,7 @@ int	main(int argc, char **argv)
 		printf("Usage: %s <file_path>\n", argv[0]);
 		return (1);
 	}
+	printf("%d",fd)
 	fd = open(argv[1], O_RDONLY);
 	if (fd == -1)
 	{
